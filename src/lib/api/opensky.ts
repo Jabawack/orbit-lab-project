@@ -6,6 +6,7 @@
  */
 
 import type { OpenSkyResponse, FlightStateArray } from '@/types/flight';
+import { parseFlightState, toFlightPoint, type FlightPoint } from '@/types/flight';
 
 const OPENSKY_BASE_URL = 'https://opensky-network.org/api';
 
@@ -73,3 +74,17 @@ export const REGIONS = {
 } as const;
 
 export type RegionKey = keyof typeof REGIONS;
+
+/**
+ * Fetch flights for a specific region
+ * Convenience wrapper that returns FlightPoint[]
+ */
+export async function fetchFlights(region: RegionKey): Promise<FlightPoint[]> {
+  const bounds = REGIONS[region];
+  const states = await fetchFlightStates(bounds);
+
+  return states
+    .map(parseFlightState)
+    .map(toFlightPoint)
+    .filter((p): p is FlightPoint => p !== null && !p.onGround);
+}

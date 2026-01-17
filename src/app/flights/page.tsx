@@ -2,9 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { useFlightData } from '@/hooks/useFlightData';
+import { useFlightData, useSettings } from '@/hooks/useFlightData';
+import { useTrajectoryData } from '@/hooks/useTrajectoryData';
 import { StatsPanel } from '@/components/panels/StatsPanel';
+import { SettingsPanel } from '@/components/panels/SettingsPanel';
 import type { RegionKey } from '@/lib/api/opensky';
+import type { RegionType } from '@/lib/supabase/types';
 
 // Dynamic import with SSR disabled for Three.js components
 const Globe = dynamic(() => import('@/components/Globe'), {
@@ -26,11 +29,22 @@ const REGIONS: { key: RegionKey; label: string }[] = [
 export default function FlightsPage() {
   const [region, setRegion] = useState<RegionKey>('usa');
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [showSettings, setShowSettings] = useState(false);
+  const [showTrajectories, setShowTrajectories] = useState(true);
+
+  const { settings } = useSettings();
 
   const { flights, isLoading, lastUpdated, refresh } = useFlightData({
     region,
     enabled: true,
+    refreshInterval: settings.refresh_interval * 1000, // Convert to ms
   });
+
+  // Get trajectory data for the current region
+  const { trajectories } = useTrajectoryData(
+    region !== 'world' ? (region as RegionType) : undefined,
+    6 // 6 hours of history
+  );
 
   // Get window dimensions for globe sizing
   useEffect(() => {
@@ -52,9 +66,11 @@ export default function FlightsPage() {
       {dimensions.width > 0 && (
         <Globe
           flights={flights}
+          trajectories={trajectories}
           width={dimensions.width}
           height={dimensions.height}
           region={region}
+          showTrajectories={showTrajectories}
         />
       )}
 
@@ -81,6 +97,18 @@ export default function FlightsPage() {
         lastUpdated={lastUpdated}
         onRefresh={refresh}
       />
+
+      {/* Settings Toggle */}
+      <button
+        onClick={() => setShowSettings(!showSettings)}
+        style={styles.settingsToggle}
+        title="Settings"
+      >
+        ⚙️
+      </button>
+
+      {/* Settings Panel */}
+      {showSettings && <SettingsPanel />}
 
       {/* Title overlay */}
       <div style={styles.title}>
@@ -143,6 +171,23 @@ const styles: Record<string, React.CSSProperties> = {
   regionButtonActive: {
     background: '#3b82f6',
     border: '1px solid #3b82f6',
+  },
+  settingsToggle: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    width: 44,
+    height: 44,
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    borderRadius: 8,
+    background: 'rgba(0, 0, 0, 0.7)',
+    color: '#fff',
+    fontSize: 20,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
   },
   title: {
     position: 'absolute',

@@ -49,14 +49,17 @@ export type FlightStateArray = [
 ];
 
 export interface FlightPoint {
-  id: string;
+  id: string;           // icao24 identifier
+  icao24: string;       // Same as id, for database compatibility
   lat: number;
   lng: number;
   alt: number;
   callsign: string;
   velocity: number;
   heading: number;
+  verticalRate: number;
   origin: string;
+  originCountry: string; // Same as origin, for database compatibility
   onGround: boolean;
 }
 
@@ -95,13 +98,16 @@ export function toFlightPoint(state: FlightState): FlightPoint | null {
 
   return {
     id: state.icao24,
+    icao24: state.icao24,
     lat: state.latitude,
     lng: state.longitude,
     alt: state.baroAltitude ?? state.geoAltitude ?? 0,
     callsign: state.callsign?.trim() || state.icao24,
     velocity: state.velocity ?? 0,
     heading: state.trueTrack ?? 0,
+    verticalRate: state.verticalRate ?? 0,
     origin: state.originCountry,
+    originCountry: state.originCountry,
     onGround: state.onGround,
   };
 }

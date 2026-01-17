@@ -4,13 +4,16 @@ import React, { useRef, useEffect, useMemo, useCallback, useState } from 'react'
 import Globe from 'react-globe.gl';
 import type { GlobeMethods } from 'react-globe.gl';
 import type { FlightPoint } from '@/types/flight';
+import type { FlightTrajectory } from '@/hooks/useTrajectoryData';
 import { getAltitudeColor } from '@/lib/utils/coordinates';
 
 interface OrbitGlobeProps {
   flights?: FlightPoint[];
+  trajectories?: FlightTrajectory[];
   width?: number;
   height?: number;
   region?: string;
+  showTrajectories?: boolean;
 }
 
 // Region center coordinates (lower altitude = more zoomed in)
@@ -22,9 +25,11 @@ const REGION_CENTERS: Record<string, { lat: number; lng: number; altitude: numbe
 
 export const OrbitGlobe: React.FC<OrbitGlobeProps> = ({
   flights = [],
+  trajectories = [],
   width,
   height,
   region = 'usa',
+  showTrajectories = true,
 }) => {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const [altitude, setAltitude] = useState(0.9);
@@ -68,9 +73,16 @@ export const OrbitGlobe: React.FC<OrbitGlobeProps> = ({
     globeRef.current.pointOfView(center, 500);
   }, [region]);
 
+  // Limit flights for performance (6000+ HTML elements kills the browser)
+  const MAX_DISPLAY_FLIGHTS = 500;
+
   // Transform flights to points data - flat dots colored by altitude
   const pointsData = useMemo(() => {
-    return flights.map((flight) => ({
+    // Sort by altitude (show higher flights) and limit
+    const sorted = [...flights].sort((a, b) => b.alt - a.alt);
+    const limited = sorted.slice(0, MAX_DISPLAY_FLIGHTS);
+
+    return limited.map((flight) => ({
       lat: flight.lat,
       lng: flight.lng,
       color: getAltitudeColor(flight.alt),
@@ -78,6 +90,21 @@ export const OrbitGlobe: React.FC<OrbitGlobeProps> = ({
       flight,
     }));
   }, [flights]);
+
+  // Transform trajectories to arcs data
+  const arcsData = useMemo(() => {
+    if (!showTrajectories || trajectories.length === 0) return [];
+
+    return trajectories.map((traj) => ({
+      startLat: traj.startLat,
+      startLng: traj.startLng,
+      endLat: traj.endLat,
+      endLng: traj.endLng,
+      color: traj.color,
+      icao24: traj.icao24,
+      callsign: traj.callsign,
+    }));
+  }, [trajectories, showTrajectories]);
 
   // Custom point label on hover
   const getPointLabel = useCallback(
@@ -146,6 +173,18 @@ export const OrbitGlobe: React.FC<OrbitGlobeProps> = ({
         pointColor={() => 'rgba(0,0,0,0)'}
         pointRadius={0.3}
         pointLabel={getPointLabel}
+        // Trajectory arcs
+        arcsData={arcsData}
+        arcStartLat="startLat"
+        arcStartLng="startLng"
+        arcEndLat="endLat"
+        arcEndLng="endLng"
+        arcColor="color"
+        arcAltitude={0.02}
+        arcStroke={0.5}
+        arcDashLength={0.4}
+        arcDashGap={0.2}
+        arcDashAnimateTime={2000}
         enablePointerInteraction={true}
       />
 
@@ -156,7 +195,7 @@ export const OrbitGlobe: React.FC<OrbitGlobeProps> = ({
         <button onClick={() => handleZoom('out')} style={styles.zoomButton}>−</button>
       </div>
 
-      {/* Altitude Legend */}
+      {/* Altitude Legend - placeholder for future state times */}
       <div style={styles.legend}>
         <div style={styles.legendTitle}>Altitude</div>
         <div style={styles.legendGradient} />
@@ -165,6 +204,13 @@ export const OrbitGlobe: React.FC<OrbitGlobeProps> = ({
           <span>High</span>
         </div>
       </div>
+
+      {/* Trajectory info */}
+      {showTrajectories && trajectories.length > 0 && (
+        <div style={styles.trajectoryInfo}>
+          <span>{trajectories.length} flight trajectories</span>
+        </div>
+      )}
     </>
   );
 };
@@ -223,6 +269,18 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 10,
     color: 'rgba(255, 255, 255, 0.5)',
     marginTop: 2,
+  },
+  trajectoryInfo: {
+    position: 'absolute',
+    left: 20,
+    bottom: 20,
+    background: 'rgba(0, 0, 0, 0.7)',
+    padding: '6px 12px',
+    borderRadius: 4,
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontFamily: 'system-ui',
+    zIndex: 10,
   },
 };
 
