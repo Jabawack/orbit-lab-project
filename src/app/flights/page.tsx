@@ -112,7 +112,7 @@ export default function FlightsPage() {
 
       {/* Title overlay */}
       <div style={styles.title}>
-        <h1 style={styles.titleText}>orbit-lab</h1>
+        <h1 style={styles.titleText}>orbit-lab-project</h1>
         <p style={styles.subtitle}>Real-time Flight Tracker</p>
       </div>
     </div>

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'orbit-lab | Home',
+  title: 'orbit-lab-project | Home',
 };
 
 interface ModeCard {
@@ -50,7 +50,7 @@ export default function HomePage() {
       <div style={styles.container}>
         {/* Header */}
         <header style={styles.header}>
-          <h1 style={styles.title}>orbit-lab</h1>
+          <h1 style={styles.title}>orbit-lab-project</h1>
           <p style={styles.subtitle}>
             A reusable 3D globe visualization framework
           </p>

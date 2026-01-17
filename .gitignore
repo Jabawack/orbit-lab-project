@@ -29,9 +29,15 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+junk*
 
 # env files (can opt-in for committing if needed)
 .env*
+
+# credentials/secrets
+credentials.json
+*.secret
+*.secrets
 
 # vercel
 .vercel

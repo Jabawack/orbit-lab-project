@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { fetchFlights } from '@/lib/api/opensky';
+import { fetchFlights, getRateLimitInfo } from '@/lib/api/opensky';
 import { saveFlightPositions } from '@/lib/supabase/flights';
 import { cleanupOldPositions } from '@/lib/supabase/flights';
 import type { RegionType } from '@/lib/supabase/types';
@@ -80,6 +80,8 @@ export async function GET(request: Request): Promise<NextResponse> {
 
   const duration = Date.now() - startTime;
 
+  const rateLimitInfo = getRateLimitInfo();
+
   const summary = {
     success: true,
     duration_ms: duration,
@@ -92,6 +94,10 @@ export async function GET(request: Request): Promise<NextResponse> {
     },
     cleanup: {
       deleted: cleanedUp,
+    },
+    rateLimit: {
+      remaining: rateLimitInfo.remaining,
+      authenticated: rateLimitInfo.authenticated,
     },
   };
 

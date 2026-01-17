@@ -2,8 +2,10 @@
 
 ## Git & Deployment Policy
 
-- **NEVER commit, push, or deploy unless explicitly requested by the user.**
-- **NEVER run `vercel`, `vercel --prod`, or any deployment commands** without explicit user permission.
+- **NEVER commit, push, or deploy without EXPLICIT user consent.**
+- **ALWAYS ask for confirmation** before running `git commit`, `git push`, `vercel`, or any deployment commands.
+- Phrases like "before we deploy" or "when we deploy" are NOT consent - they indicate future intent.
+- Only proceed when user says something like "deploy now", "yes deploy", "commit it", "push it".
 - **NEVER mention Claude or AI in commit messages.** No "Co-Authored-By: Claude" or similar attribution.
 
 ## Environment Variables

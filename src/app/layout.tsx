@@ -13,13 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'orbit-lab | 3D Globe Visualization',
+  title: 'orbit-lab-project | 3D Globe Visualization',
   description:
     'A reusable 3D globe visualization framework built with React Three Fiber and three-globe. Real-time flight tracking, satellite visualization, and more.',
   keywords: ['Three.js', 'React Three Fiber', 'globe', 'visualization', 'flight tracker', 'WebGL'],
   authors: [{ name: 'jabawack' }],
   openGraph: {
-    title: 'orbit-lab | 3D Globe Visualization',
+    title: 'orbit-lab-project | 3D Globe Visualization',
     description: 'Real-time 3D globe visualization framework',
     type: 'website',
   },

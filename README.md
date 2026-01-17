@@ -1,4 +1,4 @@
-# orbit-lab
+# orbit-lab-project
 
 A reusable 3D globe visualization framework for real-time flight tracking.
 
