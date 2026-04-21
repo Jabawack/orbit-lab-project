@@ -36,7 +36,7 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({
     .slice(0, 5);
 
   return (
-    <div style={styles.panel}>
+    <div style={styles.panel} className="panel-stats">
       <div style={styles.header}>
         <h3 style={styles.title}>Live Statistics</h3>
         {onRefresh && (
@@ -90,14 +90,14 @@ const StatBox: React.FC<{ label: string; value: string }> = ({ label, value }) =
 const styles: Record<string, React.CSSProperties> = {
   panel: {
     position: 'absolute',
-    top: 20,
+    top: 56,
     left: 20,
     width: 220,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    backgroundColor: 'var(--panel)',
     borderRadius: 8,
-    border: '1px solid rgba(255, 255, 255, 0.1)',
+    border: '1px solid var(--border)',
     fontFamily: 'system-ui, -apple-system, sans-serif',
-    color: '#fff',
+    color: 'var(--text)',
     overflow: 'hidden',
   },
   header: {
@@ -105,7 +105,7 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '12px 16px',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+    borderBottom: '1px solid var(--border)',
   },
   title: {
     margin: 0,
@@ -116,9 +116,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   refreshButton: {
     background: 'none',
-    border: '1px solid rgba(255, 255, 255, 0.3)',
+    border: '1px solid var(--border-strong)',
     borderRadius: 4,
-    color: '#fff',
+    color: 'var(--text)',
     fontSize: 14,
     cursor: 'pointer',
     padding: '4px 8px',
@@ -135,23 +135,23 @@ const styles: Record<string, React.CSSProperties> = {
   statValue: {
     fontSize: 18,
     fontWeight: 700,
-    color: '#3b82f6',
+    color: 'var(--accent)',
   },
   statLabel: {
     fontSize: 10,
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: 'var(--text-muted)',
     textTransform: 'uppercase',
     marginTop: 2,
   },
   countries: {
     padding: '8px 16px 12px',
-    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+    borderTop: '1px solid var(--border)',
   },
   subtitle: {
     margin: '0 0 8px 0',
     fontSize: 11,
     fontWeight: 600,
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: 'var(--text-muted)',
     textTransform: 'uppercase',
   },
   countryRow: {
@@ -161,14 +161,14 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: 4,
   },
   countryCount: {
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: 'var(--text-muted)',
   },
   updated: {
     fontSize: 10,
-    color: 'rgba(255, 255, 255, 0.4)',
+    color: 'var(--text-faint)',
     textAlign: 'center',
     padding: '8px 16px',
-    borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+    borderTop: '1px solid var(--border)',
   },
 };
 

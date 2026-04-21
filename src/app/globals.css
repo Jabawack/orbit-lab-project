@@ -1,10 +1,3 @@
-:root {
-  --background: #000000;
-  --foreground: #ffffff;
-  --primary: #3b82f6;
-  --primary-dark: #2563eb;
-}
-
 * {
   box-sizing: border-box;
   padding: 0;
@@ -20,11 +13,12 @@ body {
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: var(--text);
+  background: var(--bg);
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
 a {
@@ -32,27 +26,62 @@ a {
   text-decoration: none;
 }
 
-/* Spinner animation for loading state */
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-/* Custom scrollbar for panels */
+/* HUD corner brackets */
+.hud-corner {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0.55;
+}
+.hud-corner-tl { top: 16px; left: 16px; border-top: 1.5px solid var(--accent); border-left: 1.5px solid var(--accent); }
+.hud-corner-tr { top: 16px; right: 16px; border-top: 1.5px solid var(--accent); border-right: 1.5px solid var(--accent); }
+.hud-corner-bl { bottom: 16px; left: 16px; border-bottom: 1.5px solid var(--accent); border-left: 1.5px solid var(--accent); }
+.hud-corner-br { bottom: 16px; right: 16px; border-bottom: 1.5px solid var(--accent); border-right: 1.5px solid var(--accent); }
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.7); }
+}
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  display: inline-block;
+  flex-shrink: 0;
+  animation: live-pulse 2.2s ease-in-out infinite;
+}
+
+/* Hide side panels on small screens */
+@media (max-width: 900px) {
+  .panel-flightlist { display: none !important; }
+}
+@media (max-width: 767px) {
+  .panel-stats { display: none !important; }
+  .hud-corner { display: none !important; }
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--border);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--border-strong);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--text-muted);
 }

@@ -175,10 +175,64 @@ export const REGIONS = {
     lomin: 100.0,
     lomax: 150.0,
   },
+  // International corridors — over oceans between regions
+  atlantic: {
+    lamin: 38.0,
+    lamax: 70.0,
+    lomin: -60.0,
+    lomax: -5.0,
+  },
+  pacificWest: {
+    lamin: 30.0,
+    lamax: 65.0,
+    lomin: 140.0,
+    lomax: 180.0,
+  },
+  pacificEast: {
+    lamin: 30.0,
+    lamax: 65.0,
+    lomin: -180.0,
+    lomax: -120.0,
+  },
+  euroAsia: {
+    lamin: 40.0,
+    lamax: 72.0,
+    lomin: 40.0,
+    lomax: 105.0,
+  },
   world: undefined,
 } as const;
 
 export type RegionKey = keyof typeof REGIONS;
+
+export interface FlightRoute {
+  originIcao: string;
+  destIcao: string;
+}
+
+/**
+ * Fetch the known route (departure → destination airports) for a callsign.
+ * Requires authenticated OpenSky access with an active receiver contributor account.
+ * Returns null when unauthenticated, unknown callsign, or endpoint unavailable.
+ */
+export async function fetchFlightRoute(callsign: string): Promise<FlightRoute | null> {
+  const token = await getAccessToken();
+  if (!token) return null;
+
+  const url = new URL(`${OPENSKY_BASE_URL}/routes`);
+  url.searchParams.set('callsign', callsign.toUpperCase().trim());
+
+  const response = await fetch(url.toString(), {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) return null;
+
+  const data = await response.json();
+  if (!Array.isArray(data.route) || data.route.length < 2) return null;
+
+  return { originIcao: data.route[0], destIcao: data.route[data.route.length - 1] };
+}
 
 /**
  * Fetch flights for a specific region

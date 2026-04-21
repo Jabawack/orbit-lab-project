@@ -53,6 +53,15 @@ export function haversineDistance(
   return R * c;
 }
 
+export function bearingBetween(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const dLng = toRad(lng2 - lng1);
+  const y = Math.sin(dLng) * Math.cos(toRad(lat2));
+  const x =
+    Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
+    Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLng);
+  return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
+}
+
 function toRad(deg: number): number {
   return deg * (Math.PI / 180);
 }

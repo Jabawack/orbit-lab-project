@@ -2,9 +2,20 @@
 
 import React, { useCallback } from 'react';
 import { useSettings } from '@/hooks/useFlightData';
+import { useTheme, type ThemeName } from '@/styles/theme';
 
 interface SettingsPanelProps {
   onRefreshIntervalChange?: (seconds: number) => void;
+  showPlanes?: boolean;
+  showAirports?: boolean;
+  showTrails?: boolean;
+  showTrajectories?: boolean;
+  autoRotate?: boolean;
+  onTogglePlanes?: () => void;
+  onToggleAirports?: () => void;
+  onToggleTrails?: () => void;
+  onToggleTrajectories?: () => void;
+  onToggleAutoRotate?: () => void;
 }
 
 const REFRESH_OPTIONS = [
@@ -23,10 +34,27 @@ const RETENTION_OPTIONS = [
   { label: '30 days', value: 30 },
 ];
 
+const THEME_OPTIONS: { label: string; value: ThemeName }[] = [
+  { label: 'Cosmic', value: 'cosmic' },
+  { label: 'Minimal', value: 'minimal' },
+  { label: 'Topographic', value: 'topographic' },
+];
+
 export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onRefreshIntervalChange,
+  showPlanes = true,
+  showAirports = true,
+  showTrails = true,
+  showTrajectories = true,
+  autoRotate = false,
+  onTogglePlanes,
+  onToggleAirports,
+  onToggleTrails,
+  onToggleTrajectories,
+  onToggleAutoRotate,
 }) => {
   const { settings, updateRefreshInterval, updateRetentionDays } = useSettings();
+  const { themeName, setTheme } = useTheme();
 
   const handleRefreshChange = useCallback(
     async (value: number) => {
@@ -46,6 +74,25 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   return (
     <div style={styles.container}>
       <div style={styles.header}>Settings</div>
+
+      {/* Theme */}
+      <div style={styles.section}>
+        <div style={styles.label}>Theme</div>
+        <div style={styles.buttonGroup}>
+          {THEME_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => setTheme(option.value)}
+              style={{
+                ...styles.button,
+                ...(themeName === option.value ? styles.buttonActive : {}),
+              }}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* Refresh Interval */}
       <div style={styles.section}>
@@ -89,6 +136,30 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         </div>
       </div>
 
+      {/* Layers */}
+      <div style={styles.section}>
+        <div style={styles.label}>Layers</div>
+        <div style={styles.buttonGroup}>
+          {(
+            [
+              ['Planes', showPlanes, onTogglePlanes],
+              ['Airports', showAirports, onToggleAirports],
+              ['Trails', showTrails, onToggleTrails],
+              ['Arcs', showTrajectories, onToggleTrajectories],
+              ['Auto-rotate', autoRotate, onToggleAutoRotate],
+            ] as [string, boolean, (() => void) | undefined][]
+          ).map(([label, active, toggle]) => (
+            <button
+              key={label}
+              onClick={toggle}
+              style={{ ...styles.button, ...(active ? styles.buttonActive : {}) }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Info */}
       <div style={styles.info}>
         Tracks flights in USA, Europe, and East Asia.
@@ -101,32 +172,33 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 const styles: Record<string, React.CSSProperties> = {
   container: {
     position: 'absolute',
-    top: 20,
-    right: 80,
-    background: 'rgba(0, 0, 0, 0.85)',
+    top: 56,
+    right: 8,
+    background: 'var(--panel)',
     padding: 16,
     borderRadius: 8,
-    border: '1px solid rgba(255, 255, 255, 0.1)',
+    border: '1px solid var(--border)',
     zIndex: 10,
     minWidth: 200,
     fontFamily: 'system-ui, -apple-system, sans-serif',
+    color: 'var(--text)',
   },
   header: {
     fontSize: 12,
     fontWeight: 600,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: 'var(--text)',
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
     marginBottom: 16,
     paddingBottom: 8,
-    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+    borderBottom: '1px solid var(--border)',
   },
   section: {
     marginBottom: 16,
   },
   label: {
     fontSize: 11,
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: 'var(--text-muted)',
     marginBottom: 8,
     textTransform: 'uppercase',
     letterSpacing: '0.03em',
@@ -139,25 +211,25 @@ const styles: Record<string, React.CSSProperties> = {
   button: {
     padding: '6px 10px',
     fontSize: 12,
-    border: '1px solid rgba(255, 255, 255, 0.2)',
+    border: '1px solid var(--border-strong)',
     borderRadius: 4,
     background: 'transparent',
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: 'var(--text-muted)',
     cursor: 'pointer',
     transition: 'all 0.2s',
   },
   buttonActive: {
-    background: '#3b82f6',
-    borderColor: '#3b82f6',
-    color: '#fff',
+    background: 'var(--accent)',
+    border: '1px solid var(--accent)',
+    color: 'var(--accent-contrast)',
   },
   info: {
     fontSize: 10,
-    color: 'rgba(255, 255, 255, 0.4)',
+    color: 'var(--text-faint)',
     lineHeight: 1.5,
     marginTop: 8,
     paddingTop: 8,
-    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+    borderTop: '1px solid var(--border)',
   },
 };
 

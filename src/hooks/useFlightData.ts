@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import useSWR from 'swr';
-import { fetchFlightStates, type BoundingBox, type RegionKey, REGIONS } from '@/lib/api/opensky';
-import { parseFlightState, toFlightPoint, type FlightPoint } from '@/types/flight';
+import { type BoundingBox, type RegionKey, REGIONS } from '@/lib/api/opensky';
+import { parseFlightState, toFlightPoint, type FlightPoint, type FlightStateArray } from '@/types/flight';
 import { saveFlightPositions, getSettings } from '@/lib/supabase/flights';
 import type { Settings, RegionType } from '@/lib/supabase/types';
 
@@ -28,16 +28,19 @@ export function useFlightData(options: UseFlightDataOptions = {}): UseFlightData
   const { region = 'usa', bounds, enabled = true, refreshInterval } = options;
   const lastSaveRef = useRef<number>(0);
 
-  // Use custom bounds or predefined region
-  const effectiveBounds = bounds ?? REGIONS[region];
-
   // Determine refresh interval
   const effectiveInterval = refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
 
   const { data, error, isLoading, mutate } = useSWR(
-    enabled ? ['flights', JSON.stringify(effectiveBounds)] : null,
+    enabled ? ['flights', region, JSON.stringify(bounds ?? null)] : null,
     async () => {
-      const states = await fetchFlightStates(effectiveBounds);
+      // Call our server-side proxy — browser-direct OpenSky is CORS-blocked
+      const res = await fetch(`/api/flights?region=${encodeURIComponent(region)}`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `Flights API returned ${res.status}`);
+      }
+      const { states } = (await res.json()) as { states: FlightStateArray[] };
       const flights = states
         .map(parseFlightState)
         .map(toFlightPoint)
@@ -45,8 +48,9 @@ export function useFlightData(options: UseFlightDataOptions = {}): UseFlightData
 
       // Save to Supabase (throttled to avoid too many writes)
       // Only save if region is one of the tracked regions (not 'world')
+      const TRACKED_REGIONS = new Set(['usa', 'europe', 'eastAsia']);
       const now = Date.now();
-      if (now - lastSaveRef.current >= 30000 && region !== 'world') {
+      if (now - lastSaveRef.current >= 30000 && TRACKED_REGIONS.has(region)) {
         lastSaveRef.current = now;
         // Fire and forget - don't block the UI
         saveFlightPositions(flights, region as RegionType, 'client').catch((err) => {

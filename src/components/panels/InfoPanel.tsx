@@ -7,16 +7,21 @@ import { metersToFeet, msToKnots } from '@/lib/utils/coordinates';
 interface InfoPanelProps {
   flight: FlightPoint | null;
   onClose?: () => void;
+  bottomSheet?: boolean;
 }
 
-export const InfoPanel: React.FC<InfoPanelProps> = ({ flight, onClose }) => {
+export const InfoPanel: React.FC<InfoPanelProps> = ({ flight, onClose, bottomSheet = false }) => {
   if (!flight) return null;
 
   const altitudeFeet = Math.round(metersToFeet(flight.alt));
   const speedKnots = Math.round(msToKnots(flight.velocity));
 
+  const panelStyle = bottomSheet
+    ? { ...styles.panel, top: 'auto', bottom: 0, left: 0, right: 0, width: '100%', borderRadius: '14px 14px 0 0', maxHeight: '55vh', overflowY: 'auto' as const }
+    : styles.panel;
+
   return (
-    <div style={styles.panel}>
+    <div style={panelStyle}>
       <div style={styles.header}>
         <h3 style={styles.callsign}>{flight.callsign}</h3>
         <button onClick={onClose} style={styles.closeButton}>
@@ -48,23 +53,24 @@ const InfoRow: React.FC<{ label: string; value: string }> = ({ label, value }) =
 const styles: Record<string, React.CSSProperties> = {
   panel: {
     position: 'absolute',
-    top: 20,
+    top: 56,
     right: 20,
     width: 280,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    backgroundColor: 'var(--panel)',
     borderRadius: 8,
-    border: '1px solid rgba(255, 255, 255, 0.1)',
+    border: '1px solid var(--border)',
     overflow: 'hidden',
     fontFamily: 'system-ui, -apple-system, sans-serif',
-    color: '#fff',
+    color: 'var(--text)',
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '12px 16px',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-    backgroundColor: 'rgba(59, 130, 246, 0.3)',
+    borderBottom: '1px solid var(--border)',
+    backgroundColor: 'var(--accent)',
+    color: 'var(--accent-contrast)',
   },
   callsign: {
     margin: 0,
@@ -75,12 +81,12 @@ const styles: Record<string, React.CSSProperties> = {
   closeButton: {
     background: 'none',
     border: 'none',
-    color: '#fff',
+    color: 'var(--accent-contrast)',
     fontSize: 24,
     cursor: 'pointer',
     padding: 0,
     lineHeight: 1,
-    opacity: 0.7,
+    opacity: 0.85,
   },
   content: {
     padding: 16,
@@ -92,13 +98,14 @@ const styles: Record<string, React.CSSProperties> = {
   },
   label: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: 'var(--text-muted)',
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
   },
   value: {
     fontSize: 14,
     fontWeight: 500,
+    color: 'var(--text)',
   },
 };
 
